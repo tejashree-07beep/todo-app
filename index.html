@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <div class="todo-header">
+            <h2>Task Manager</h2>
+        </div>
+        
+        <form id="todo-form">
+            <input type="text" id="todo-input" placeholder="What needs to be done?" autocomplete="off" required>
+            <button type="submit" id="add-btn">Add</button>
+        </form>
+
+        <ul id="todo-list">
+        </ul>
+        
+        <div class="todo-footer">
+            <span id="task-count">0 tasks</span>
+            <button id="clear-all">Clear All</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
