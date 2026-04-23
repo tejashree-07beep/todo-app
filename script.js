@@ -1,82 +1,90 @@
-const todoForm = document.getElementById('todo-form');
-const todoInput = document.getElementById('todo-input');
-const todoList = document.getElementById('todo-list');
-const taskCount = document.getElementById('task-count');
-const clearAllBtn = document.getElementById('clear-all');
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let filter = "all";
 
-let todos = JSON.parse(localStorage.getItem('todos')) || [];
+const input = document.getElementById("taskInput");
 
-function saveTodos() {
-    localStorage.setItem('todos', JSON.stringify(todos));
-    updateTaskCount();
-}
-
-function updateTaskCount() {
-    const activeTasks = todos.filter(t => !t.completed).length;
-    taskCount.textContent = `${activeTasks} task${activeTasks !== 1 ? 's' : ''} left`;
-}
-
-function createTodoElement(todo, index) {
-    const li = document.createElement('li');
-    li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-    
-    li.innerHTML = `
-        <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${index})">
-        <span class="todo-text">${escapeHTML(todo.text)}</span>
-        <button class="delete-btn" onclick="deleteTodo(${index})">&times;</button>
-    `;
-    
-    return li;
-}
-
-function renderTodos() {
-    todoList.innerHTML = '';
-    todos.forEach((todo, index) => {
-        todoList.appendChild(createTodoElement(todo, index));
-    });
-    updateTaskCount();
-}
-
-function addTodo(e) {
-    e.preventDefault();
-    const text = todoInput.value.trim();
-    if (text) {
-        todos.push({ text, completed: false });
-        todoInput.value = '';
-        saveTodos();
-        renderTodos();
-    }
-}
-
-window.toggleTodo = function(index) {
-    todos[index].completed = !todos[index].completed;
-    saveTodos();
-    renderTodos();
-}
-
-window.deleteTodo = function(index) {
-    todos.splice(index, 1);
-    saveTodos();
-    renderTodos();
-}
-
-clearAllBtn.addEventListener('click', () => {
-    todos = todos.filter(t => !t.completed);
-    saveTodos();
-    renderTodos();
+input.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") addTask();
 });
 
-function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, 
-        tag => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            "'": '&#39;',
-            '"': '&quot;'
-        }[tag] || tag)
-    );
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-todoForm.addEventListener('submit', addTodo);
-renderTodos();
+function renderTasks() {
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    let filteredTasks = tasks;
+
+    if (filter === "active") {
+        filteredTasks = tasks.filter(t => !t.completed);
+    } else if (filter === "completed") {
+        filteredTasks = tasks.filter(t => t.completed);
+    }
+
+    filteredTasks.forEach((task, index) => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+            <div class="task-left">
+                <div class="circle ${task.completed ? 'completed' : ''}" onclick="toggleTask(${index})"></div>
+                <span class="task-text ${task.completed ? 'completed' : ''}">
+                    ${task.text}
+                </span>
+            </div>
+            <button class="delete-btn" onclick="deleteTask(${index})">✖</button>
+        `;
+
+        list.appendChild(li);
+    });
+
+    updateCount();
+}
+
+function addTask() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    tasks.push({ text, completed: false });
+    input.value = "";
+    saveTasks();
+    renderTasks();
+}
+
+function toggleTask(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+}
+
+function clearCompleted() {
+    tasks = tasks.filter(t => !t.completed);
+    saveTasks();
+    renderTasks();
+}
+
+function updateCount() {
+    const active = tasks.filter(t => !t.completed).length;
+    document.getElementById("taskCount").innerText = `${active} tasks left`;
+}
+
+function setFilter(type) {
+    filter = type;
+
+    document.querySelectorAll(".filters button").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    event.target.classList.add("active");
+
+    renderTasks();
+}
+
+renderTasks();
